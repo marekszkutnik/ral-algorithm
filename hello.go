@@ -7,113 +7,109 @@ import (
 
 type Replicas_profile struct {
 	replicas_num        int
-	CPU_reservation     float32
-	CPU_aspiration      float32
-	RAM_reservation     float32
-	RAM_aspiration      float32
-	latency_reservation float32
-	latency_aspiration  float32
+	CPU_reservation     float64
+	CPU_aspiration      float64
+	RAM_reservation     float64
+	RAM_aspiration      float64
+	latency_reservation float64
+	latency_aspiration  float64
 }
+
+const (
+	maxCPUPerPod = 2000.0
+	maxRAMPerPod = 400.0
+	maxLATPerPod = 10.0
+)
+
+var (
+	curentCPU = 9100.0
+	curentRAM = 1700.0
+	curentLAT = 43.0
+
+	CPUReservationPerPod = 1500.0
+	RAMReservationPerPod = 300.0
+	LATReservationPerPod = 8.0
+	CPUAspirationPerPod  = 200.0
+	RAMAspirationPerPod  = 100.0
+	LATAspirationPerPod  = 3.0
+
+	rp1 Replicas_profile
+	rp2 Replicas_profile
+	rp3 Replicas_profile
+	rp4 Replicas_profile
+	rp5 Replicas_profile
+	rp6 Replicas_profile
+	rp7 Replicas_profile
+	rp8 Replicas_profile
+
+	new_replicas_num int
+)
 
 func main() {
 	// fmt.Println("Hello World!")
 
-	var CPU float32
-	var RAM float32
-	var latency float32
+	// normalize params
+	curentCPUNorm := NormalizeCPU(curentCPU)
+	curentRAMNorm := NormalizeRAM(curentRAM)
+	curentLATNorm := NormalizeLAT(curentLAT)
 
-	var new_replicas_num int
+	CPUReservationPerPodNorm := NormalizeCPU(CPUReservationPerPod)
+	RAMReservationPerPodNorm := NormalizeRAM(RAMReservationPerPod)
+	LATReservationPerPodNorm := NormalizeLAT(LATReservationPerPod)
+	CPUAspirationPerPodNorm := NormalizeCPU(CPUAspirationPerPod)
+	RAMAspirationPerPodNorm := NormalizeRAM(RAMAspirationPerPod)
+	LATAspirationPerPodNorm := NormalizeLAT(LATAspirationPerPod)
 
-	CPU = 0.5
-	RAM = 0.5
-	latency = 0.5
+	// set replicas profiles R and A levels
+	SetProfilesParams(&rp1, 1, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp2, 2, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp3, 3, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp4, 4, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp5, 5, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp6, 6, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp7, 7, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp8, 8, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
 
-	var rp1 Replicas_profile
-	var rp2 Replicas_profile
-	var rp3 Replicas_profile
-	var rp4 Replicas_profile
+	Replicas_profiles := [8]Replicas_profile{rp1, rp2, rp3, rp4, rp5, rp6, rp7, rp8}
 
-	rp1.replicas_num = 1
-	rp1.CPU_reservation = 0.4
-	rp1.CPU_aspiration = 0.3
-	rp1.RAM_reservation = 0.4
-	rp1.RAM_aspiration = 0.3
-	rp1.latency_reservation = 0.4
-	rp1.latency_aspiration = 0.3
+	// for _, val := range Replicas_profiles {
+	// 	fmt.Println(val.replicas_num)
+	// 	fmt.Println(val.CPU_reservation)
+	// 	fmt.Println(val.RAM_reservation)
+	// 	fmt.Println(val.latency_reservation)
+	// 	fmt.Println(val.CPU_aspiration)
+	// 	fmt.Println(val.RAM_aspiration)
+	// 	fmt.Println(val.latency_aspiration)
+	// 	fmt.Println("--------------")
+	// }
 
-	rp2.replicas_num = 2
-	rp2.CPU_reservation = 0.6
-	rp2.CPU_aspiration = 0.4
-	rp2.RAM_reservation = 0.6
-	rp2.RAM_aspiration = 0.4
-	rp2.latency_reservation = 0.6
-	rp2.latency_aspiration = 0.4
+	// fmt.Println("")
 
-	rp3.replicas_num = 3
-	rp3.CPU_reservation = 0.7
-	rp3.CPU_aspiration = 0.3
-	rp3.RAM_reservation = 0.7
-	rp3.RAM_aspiration = 0.3
-	rp3.latency_reservation = 0.7
-	rp3.latency_aspiration = 0.5
-
-	rp4.replicas_num = 4
-	rp4.CPU_reservation = 0.95
-	rp4.CPU_aspiration = 0.6
-	rp4.RAM_reservation = 0.95
-	rp4.RAM_aspiration = 0.6
-	rp4.latency_reservation = 0.95
-	rp4.latency_aspiration = 0
-
-	// var prefer_min = []float32{}
-	// var prefer_max = []float32{}
-
-	var Replicas_profiles = [4]Replicas_profile{rp1, rp2, rp3, rp4}
-
-	// fmt.Println("Hello World!", CPU, RAM, latency)
-	// fmt.Println("MIN", prefer_min)
-	// fmt.Println("MAX", prefer_max)
-	// fmt.Println("RP", Replicas_profiles)
-
-	var tmp_prefer_min = []float32{}
-	var tmp_prefer_max = []float32{}
-
-	var prefer_max = make(map[int]float32)
+	var tmp_prefer_min = []float64{}
+	var prefer_max = make(map[int]float64)
 
 	// findPreferMaxMap
 	for _, val := range Replicas_profiles {
-		tmp_CPU := (val.CPU_reservation - CPU) / (val.CPU_reservation - val.CPU_aspiration)
-		tmp_RAM := (val.RAM_reservation - RAM) / (val.RAM_reservation - val.RAM_aspiration)
-		tmp_latency := (val.latency_reservation - latency) / (val.latency_reservation - val.latency_aspiration)
+		tmp_CPU := (val.CPU_reservation - curentCPUNorm) / (val.CPU_reservation - val.CPU_aspiration)
+		tmp_RAM := (val.RAM_reservation - curentRAMNorm) / (val.RAM_reservation - val.RAM_aspiration)
+		tmp_latency := (val.latency_reservation - curentLATNorm) / (val.latency_reservation - val.latency_aspiration)
 
-		/*
-			prefer_min = append(prefer_min, tmp_CPU, tmp_RAM, tmp_latency)
+		// fmt.Println("CPU ", tmp_CPU, " RAM ", tmp_RAM, " LAT ", tmp_latency)
 
-			sort.Slice(prefer_min, func(i, j int) bool {
-				return prefer_min[i] < prefer_min[j]
+		// check if feasible
+		if tmp_CPU >= 0 && tmp_RAM >= 0 && tmp_latency >= 0 {
+			tmp_prefer_min = append(tmp_prefer_min, tmp_CPU, tmp_RAM, tmp_latency)
+		}
+
+		if len(tmp_prefer_min) > 0 {
+			sort.Slice(tmp_prefer_min, func(i, j int) bool {
+				return tmp_prefer_min[i] < tmp_prefer_min[j]
 			})
 
-			prefer_max = append(prefer_max, prefer_min[0])
+			prefer_max[val.replicas_num] = tmp_prefer_min[0]
 
-			prefer_min = nil
-
-			fmt.Printf("%v\n", prefer_max)
-		*/
-
-		tmp_prefer_min := append(tmp_prefer_min, tmp_CPU, tmp_RAM, tmp_latency)
-
-		sort.Slice(tmp_prefer_min, func(i, j int) bool {
-			return tmp_prefer_min[i] < tmp_prefer_min[j]
-		})
-
-		tmp_prefer_max = append(tmp_prefer_max, tmp_prefer_min[0])
-
-		// fmt.Printf("%v\n", tmp_prefer_max)
-
-		prefer_max[val.replicas_num] = tmp_prefer_max[0]
-
-		tmp_prefer_min = nil
-		tmp_prefer_max = nil
+			tmp_prefer_min = nil
+		}
 	}
 
 	fmt.Printf("Prefer MAX Map: %v\n\n", prefer_max)
@@ -125,7 +121,7 @@ func main() {
 	}
 
 	sort.SliceStable(keys, func(i, j int) bool {
-		return prefer_max[keys[i]] > prefer_max[keys[j]]
+		return prefer_max[keys[i]] < prefer_max[keys[j]]
 	})
 
 	// fmt.Printf("%v\n\n", keys)
@@ -133,4 +129,34 @@ func main() {
 	new_replicas_num = keys[0]
 
 	fmt.Printf("New Replicas num: %v", new_replicas_num)
+}
+
+func SetProfilesParams(rp *Replicas_profile, rpN int, CPURsv float64, RAMRsv float64, LATRsv float64, CPUAsp float64, RAMAsp float64, LATAsp float64) {
+	rp.replicas_num = rpN
+
+	rp.CPU_reservation = CPURsv * float64(rpN)
+	rp.RAM_reservation = RAMRsv * float64(rpN)
+	rp.latency_reservation = LATRsv * float64(rpN)
+
+	rp.CPU_aspiration = CPUAsp * float64(rpN)
+	rp.RAM_aspiration = RAMAsp * float64(rpN)
+	rp.latency_aspiration = LATAsp * float64(rpN)
+}
+
+func NormalizeCPU(CPU float64) float64 {
+	normalizedCPU := CPU / maxCPUPerPod
+
+	return normalizedCPU
+}
+
+func NormalizeRAM(RAM float64) float64 {
+	normalizedRAM := RAM / maxRAMPerPod
+
+	return normalizedRAM
+}
+
+func NormalizeLAT(LAT float64) float64 {
+	normalizedLAT := LAT / maxLATPerPod
+
+	return normalizedLAT
 }
