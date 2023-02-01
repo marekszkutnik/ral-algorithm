@@ -33,14 +33,16 @@ var (
 	RAMAspirationPerPod  = 100.0
 	LATAspirationPerPod  = 3.0
 
-	rp1 ReplicasProfile
-	rp2 ReplicasProfile
-	rp3 ReplicasProfile
-	rp4 ReplicasProfile
-	rp5 ReplicasProfile
-	rp6 ReplicasProfile
-	rp7 ReplicasProfile
-	rp8 ReplicasProfile
+	rp1  ReplicasProfile
+	rp2  ReplicasProfile
+	rp3  ReplicasProfile
+	rp4  ReplicasProfile
+	rp5  ReplicasProfile
+	rp6  ReplicasProfile
+	rp7  ReplicasProfile
+	rp8  ReplicasProfile
+	rp9  ReplicasProfile
+	rp10 ReplicasProfile
 
 	newReplicasNum int
 )
@@ -58,7 +60,7 @@ func CalculateDesiredReplicasbyRALAlgorithm(curentCPUVal float64, curentRAMVal f
 	curentRAMNorm := NormalizeRAM(curentRAMVal)
 	curentLATNorm := NormalizeLAT(curentLATVal)
 
-	ReplicasProfiles := [8]ReplicasProfile{rp1, rp2, rp3, rp4, rp5, rp6, rp7, rp8}
+	ReplicasProfiles := [10]ReplicasProfile{rp1, rp2, rp3, rp4, rp5, rp6, rp7, rp8, rp9, rp10}
 
 	var tmp_prefer_min = []float64{}
 	var prefer_max = make(map[int]float64)
@@ -85,19 +87,23 @@ func CalculateDesiredReplicasbyRALAlgorithm(curentCPUVal float64, curentRAMVal f
 		}
 	}
 
-	fmt.Printf("Prefer MAX Map: %v\n\n", prefer_max)
+	if len(prefer_max) > 0 {
+		fmt.Printf("Prefer MAX Map: %v\n\n", prefer_max)
 
-	// getReplicasNum
-	keys := make([]int, 0, len(prefer_max))
-	for key := range prefer_max {
-		keys = append(keys, key)
+		// getReplicasNum
+		keys := make([]int, 0, len(prefer_max))
+		for key := range prefer_max {
+			keys = append(keys, key)
+		}
+
+		sort.SliceStable(keys, func(i, j int) bool {
+			return prefer_max[keys[i]] < prefer_max[keys[j]]
+		})
+
+		newReplicasNum = keys[0]
+	} else {
+		newReplicasNum = len(ReplicasProfiles)
 	}
-
-	sort.SliceStable(keys, func(i, j int) bool {
-		return prefer_max[keys[i]] < prefer_max[keys[j]]
-	})
-
-	newReplicasNum = keys[0]
 
 	// fmt.Printf("New Replicas num: %v", new_replicasNum)
 	return newReplicasNum
@@ -120,6 +126,8 @@ func SetProfilesWithNormalizedParams(CPUReservationPerPodVal float64, RAMReserva
 	SetProfilesParams(&rp6, 6, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
 	SetProfilesParams(&rp7, 7, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
 	SetProfilesParams(&rp8, 8, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp9, 9, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp10, 10, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
 }
 
 func SetProfilesParams(rp *ReplicasProfile, rpN int, CPURsv float64, RAMRsv float64, LATRsv float64, CPUAsp float64, RAMAsp float64, LATAsp float64) {
