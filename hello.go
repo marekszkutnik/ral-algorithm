@@ -22,9 +22,9 @@ const (
 )
 
 var (
-	curentCPU = 9100.0
-	curentRAM = 1700.0
-	curentLAT = 43.0
+	curentCPU = 4400.0
+	curentRAM = 900.0
+	curentLAT = 25.0
 
 	CPUReservationPerPod = 1500.0
 	RAMReservationPerPod = 300.0
@@ -46,33 +46,17 @@ var (
 )
 
 func main() {
-	numberOfReplicas := CalculateDesiredReplicasbyRALAlgorithm()
+	SetProfilesWithNormalizedParams(CPUReservationPerPod, RAMReservationPerPod, LATReservationPerPod, CPUAspirationPerPod, RAMAspirationPerPod, LATAspirationPerPod)
+	numberOfReplicas := CalculateDesiredReplicasbyRALAlgorithm(curentCPU, curentRAM, curentLAT)
 
-	fmt.Printf("New Replicas num: %v", numberOfReplicas)
+	fmt.Printf("New Replicas num: %v", float64(numberOfReplicas))
 }
 
-func CalculateDesiredReplicasbyRALAlgorithm() (numberOfReplicas int) {
+func CalculateDesiredReplicasbyRALAlgorithm(curentCPUVal float64, curentRAMVal float64, curentLATVal float64) (numberOfReplicas int) {
 	// normalize params
-	curentCPUNorm := NormalizeCPU(curentCPU)
-	curentRAMNorm := NormalizeRAM(curentRAM)
-	curentLATNorm := NormalizeLAT(curentLAT)
-
-	CPUReservationPerPodNorm := NormalizeCPU(CPUReservationPerPod)
-	RAMReservationPerPodNorm := NormalizeRAM(RAMReservationPerPod)
-	LATReservationPerPodNorm := NormalizeLAT(LATReservationPerPod)
-	CPUAspirationPerPodNorm := NormalizeCPU(CPUAspirationPerPod)
-	RAMAspirationPerPodNorm := NormalizeRAM(RAMAspirationPerPod)
-	LATAspirationPerPodNorm := NormalizeLAT(LATAspirationPerPod)
-
-	// set replicas profiles R and A levels
-	SetProfilesParams(&rp1, 1, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
-	SetProfilesParams(&rp2, 2, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
-	SetProfilesParams(&rp3, 3, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
-	SetProfilesParams(&rp4, 4, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
-	SetProfilesParams(&rp5, 5, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
-	SetProfilesParams(&rp6, 6, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
-	SetProfilesParams(&rp7, 7, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
-	SetProfilesParams(&rp8, 8, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	curentCPUNorm := NormalizeCPU(curentCPUVal)
+	curentRAMNorm := NormalizeRAM(curentRAMVal)
+	curentLATNorm := NormalizeLAT(curentLATVal)
 
 	ReplicasProfiles := [8]ReplicasProfile{rp1, rp2, rp3, rp4, rp5, rp6, rp7, rp8}
 
@@ -101,7 +85,7 @@ func CalculateDesiredReplicasbyRALAlgorithm() (numberOfReplicas int) {
 		}
 	}
 
-	// fmt.Printf("Prefer MAX Map: %v\n\n", prefer_max)
+	fmt.Printf("Prefer MAX Map: %v\n\n", prefer_max)
 
 	// getReplicasNum
 	keys := make([]int, 0, len(prefer_max))
@@ -117,6 +101,25 @@ func CalculateDesiredReplicasbyRALAlgorithm() (numberOfReplicas int) {
 
 	// fmt.Printf("New Replicas num: %v", new_replicasNum)
 	return newReplicasNum
+}
+
+func SetProfilesWithNormalizedParams(CPUReservationPerPodVal float64, RAMReservationPerPodVal float64, LATReservationPerPodVal float64, CPUAspirationPerPodVal float64, RAMAspirationPerPodVal float64, LATAspirationPerPodVal float64) {
+	CPUReservationPerPodNorm := NormalizeCPU(CPUReservationPerPodVal)
+	RAMReservationPerPodNorm := NormalizeRAM(RAMReservationPerPodVal)
+	LATReservationPerPodNorm := NormalizeLAT(LATReservationPerPodVal)
+	CPUAspirationPerPodNorm := NormalizeCPU(CPUAspirationPerPodVal)
+	RAMAspirationPerPodNorm := NormalizeRAM(RAMAspirationPerPodVal)
+	LATAspirationPerPodNorm := NormalizeLAT(LATAspirationPerPodVal)
+
+	// set replicas profiles R and A levels
+	SetProfilesParams(&rp1, 1, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp2, 2, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp3, 3, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp4, 4, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp5, 5, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp6, 6, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp7, 7, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
+	SetProfilesParams(&rp8, 8, CPUReservationPerPodNorm, RAMReservationPerPodNorm, LATReservationPerPodNorm, CPUAspirationPerPodNorm, RAMAspirationPerPodNorm, LATAspirationPerPodNorm)
 }
 
 func SetProfilesParams(rp *ReplicasProfile, rpN int, CPURsv float64, RAMRsv float64, LATRsv float64, CPUAsp float64, RAMAsp float64, LATAsp float64) {
